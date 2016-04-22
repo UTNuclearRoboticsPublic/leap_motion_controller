@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<package>
+  <name>leap_motion_controller</name>
+  <version>0.0.0</version>
+  <description>ROS driver for Leap Motion Controller (https://www.leapmotion.com)</description>
+
+  <maintainer email="karl.kruusamae@utexas.edu">Karl Kruusamäe</maintainer>
+
+  <license>3-clause BSD</license>
+
+
+  <!-- Url tags are optional, but mutiple are allowed, one per tag -->
+  <!-- Optional attribute type can be: website, bugtracker, or repository -->
+  <!-- Example: -->
+  <!-- <url type="website">http://wiki.ros.org/leap_motion_controller</url> -->
+
+
+  <author email="karl.kruusamae@utexas.edu">Karl Kruusamäe</author>
+
+
+  <!-- Use build_depend for packages you need at compile time: -->
+  <build_depend>message_generation</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+
+  <!-- Use run_depend for packages you need at runtime: -->
+  <run_depend>message_runtime</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>geometry_msgs</run_depend>
+  
+  <!-- Use test_depend for packages you need only for testing: -->
+  <!--   <test_depend>gtest</test_depend> -->
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+
+  <!-- The export tag contains other, unspecified, tags -->
+  <export>
+    <!-- Other tools can request additional information be placed here -->
+
+  </export>
+</package>
