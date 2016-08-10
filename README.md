@@ -3,15 +3,15 @@
 ROS driver for Leap Motion (TM) Controller (https://www.leapmotion.com). It reads data from Leap Motion Controller and publishes it as ROS messages.
  
 #### Instructions
-Install:
+**__Install:__**
 
-leap_motion_controller uses Leap Motion SDK. Download original drivers and the SDK from https://developer.leapmotion.com and install it in any desired location.
+Since leap_motion_controller uses Leap Motion SDK, first download the original drivers and the SDK from https://developer.leapmotion.com. Install using instructions in their README and copy LeapSDK to any desired location.
 
-Add `export LEAP_SDK=[PATH TO YOUR LEAP SDK INSTALLATION]` to your .profile or .bashrc file.
+Add `export LEAP_SDK=[PATH TO YOUR LeapSDK FOLDER]` to your .bashrc file.
 
-Clone and compile.
+Clone this repository to your catkin workspace and compile using catkin_make.
 
-Run:
+**__Run:__**
 
 `rosrun leap_motion_controller leap_motion`
 
