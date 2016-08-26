@@ -98,7 +98,7 @@ void LeapListener::onFrame(const Leap::Controller& controller)
   ros_msg.header.frame_id = "leap_motion";
 
   // FYI
-  std::cout << "Frame id: " << work_frame.id()
+  std::cout << "- Frame id: " << work_frame.id()
             << ", timestamp: " << work_frame.timestamp()
             << ", hands: " << work_frame.hands().count()
             << ", extended fingers: " << work_frame.fingers().extended().count()
@@ -119,20 +119,46 @@ void LeapListener::onFrame(const Leap::Controller& controller)
       {
 	ros_msg.left_hand = true;					// set ros_msg.left_hand TRUE
 	left_hand = hands_in_frame[i];					// set this hand as left_hand
-	printf("Lefty HERE! Sphere radius: %.1f; Pinch strength: %f\n", left_hand.sphereRadius(), left_hand.pinchStrength());		// FYI
-	
-	// convert palm position into meters and copy to ros_msg.left_palm_pos
+
+	// FYI
+	std::cout << std::fixed << std::setprecision(1)
+		  << "Left hand  sphere radius: " << left_hand.sphereRadius()
+		  << std::fixed << std::setprecision(2)
+		  << " and pinch strength: " << left_hand.pinchStrength() << std::endl;
+
+	// Convert palm position into meters and copy to ros_msg.left_palm_pos
 	ros_msg.left_palm_pose.position.x = left_hand.palmPosition().x/1000;
 	ros_msg.left_palm_pose.position.y = left_hand.palmPosition().y/1000;
 	ros_msg.left_palm_pose.position.z = left_hand.palmPosition().z/1000;
+	
+	// FYI
+	std::cout << std::fixed << std::setprecision(4)
+		  << "           position: x= " << ros_msg.left_palm_pose.position.x
+		  << " y= " << ros_msg.left_palm_pose.position.y
+		  << " z= " << ros_msg.left_palm_pose.position.z << std::endl;
 	
 	// Get hand's roll-pitch-yam and convert them into quaternion.
 	// NOTE: Leap Motion roll-pith-yaw is from the perspective of human, so I am mapping it so that roll is about x-, pitch about y-, and yaw about z-axis.
 	float l_yaw = left_hand.palmNormal().roll();
 	float l_roll = left_hand.direction().pitch();
 	float l_pitch = -left_hand.direction().yaw();			// Negating to comply with the right hand rule.
-	printf("Lefty HERE! Roll: %.2f; Pitch: %.2f; Yaw: %.2f\n", l_roll, l_pitch, l_yaw);
+	// FYI
+	std::cout << std::fixed << std::setprecision(4)
+		  << "           RPY:      R= " << l_roll
+		  << " P= " << l_pitch
+		  << " Y= " << l_yaw << std::endl;
 	ros_msg.left_palm_pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(l_roll, l_pitch, l_yaw);
+	
+	// Copy palm velocity to ROS message in meters
+	ros_msg.left_palm_velocity.x = left_hand.palmVelocity().x/1000;
+	ros_msg.left_palm_velocity.y = left_hand.palmVelocity().y/1000;
+	ros_msg.left_palm_velocity.z = left_hand.palmVelocity().z/1000;
+	
+	// FYI
+	std::cout << std::fixed << std::setprecision(4)
+		  << "           velocity: x= " << ros_msg.left_palm_velocity.x
+		  << " y= " << ros_msg.left_palm_velocity.y
+		  << " z= " << ros_msg.left_palm_velocity.z << std::endl;
 
 	// Put sphere radius and pinch strength into ROS message
 	ros_msg.left_hand_sphere_radius = left_hand.sphereRadius();
@@ -144,20 +170,46 @@ void LeapListener::onFrame(const Leap::Controller& controller)
       {
 	ros_msg.right_hand = true;					// set ros_msg.right_hand true
 	right_hand = hands_in_frame[i];					// set this hand as right_hand
-	printf("Righty HERE! Sphere radius: %.1f; Pinch strength: %f\n", right_hand.sphereRadius(), right_hand.pinchStrength());	// FYI
 	
+	// FYI
+	std::cout << std::fixed << std::setprecision(1)
+		  << "Right hand sphere radius: " << right_hand.sphereRadius()
+		  << std::fixed << std::setprecision(2)
+		  << " and pinch strength: " << right_hand.pinchStrength() << std::endl;
+		  
 	// Convert palm position into meters and copy to ros_msg.right_palm_pos
 	ros_msg.right_palm_pose.position.x = right_hand.palmPosition().x/1000;
 	ros_msg.right_palm_pose.position.y = right_hand.palmPosition().y/1000;
 	ros_msg.right_palm_pose.position.z = right_hand.palmPosition().z/1000;
+	
+	// FYI
+	std::cout << std::fixed << std::setprecision(4)
+		  << "           position: x= " << ros_msg.right_palm_pose.position.x
+		  << " y= " << ros_msg.right_palm_pose.position.y
+		  << " z= " << ros_msg.right_palm_pose.position.z << std::endl;
 
 	// Get hand's roll-pitch-yam and convert them into quaternion.
 	// NOTE: Leap Motion roll-pith-yaw is from the perspective of human, so I am mapping it so that roll is about x-, pitch about y-, and yaw about z-axis.
 	float r_yaw = right_hand.palmNormal().roll();
 	float r_roll = right_hand.direction().pitch();
 	float r_pitch = -right_hand.direction().yaw();			// Negating to comply with the right hand rule.
-	printf("Righty HERE! Roll: %.2f; Pitch: %.2f; Yaw: %.2f\n", r_roll, r_pitch, r_yaw);
+	// FYI
+	std::cout << std::fixed << std::setprecision(4)
+		  << "           RPY:      R= " << r_roll
+		  << " P= " << r_pitch
+		  << " Y= " << r_yaw << std::endl;
 	ros_msg.right_palm_pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(r_roll, r_pitch, r_yaw);
+
+	// Copy palm velocity to ROS message in meters
+	ros_msg.right_palm_velocity.x = right_hand.palmVelocity().x/1000;
+	ros_msg.right_palm_velocity.y = right_hand.palmVelocity().y/1000;
+	ros_msg.right_palm_velocity.z = right_hand.palmVelocity().z/1000;
+	
+	// FYI
+	std::cout << std::fixed << std::setprecision(4)
+		  << "           velocity: x= " << ros_msg.right_palm_velocity.x
+		  << " y= " << ros_msg.right_palm_velocity.y
+		  << " z= " << ros_msg.right_palm_velocity.z << std::endl;
 
 	// Put sphere radius and pinch strength into ROS message
 	ros_msg.right_hand_sphere_radius = right_hand.sphereRadius();
