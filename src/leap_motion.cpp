@@ -222,8 +222,6 @@ void LeapListener::onFrame(const Leap::Controller& controller)
   // TODO Do I actually need gestures in this ROS driver or at all. If the answer is YES, perhaps add some other gestures, e.g. swipe and circle.
   // Maybe enable gestures with a YAML file
   // leap_motion_controller_data:
-  //	-left_hand_frame:	"leap_motion"	# that makes sense if you start using PoseStamped for palm, this way you can have different frames from different hands if you want
-  //	-right_hand_frame:	"leap_motion"
   //	-enable_key_tap:	true
   //	-enable_swipe:		true
   // etc ...
