@@ -212,8 +212,7 @@ int main(int argc, char** argv)
   LeapListener listener;
 
   // Set up ROS publisher for LeapListener
-  // TODO change the topic name when doing code cleanup
-  listener.ros_publisher_ = nh.advertise<leap_motion_controller::LeapMotionOutput>("leapmotion_general"/*"leap_motion_output"*/, 10);
+  listener.ros_publisher_ = nh.advertise<leap_motion_controller::LeapMotionOutput>("leap_motion_output", 10);
 
   // Instance of LEAP Controller
   Leap::Controller controller;
