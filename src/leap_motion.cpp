@@ -105,8 +105,8 @@ void LeapListener::onFrame(const Leap::Controller& controller)
             << ", gestures: " << work_frame.gestures().count() << std::endl;
   
   Leap::HandList hands_in_frame = work_frame.hands();			// get HandList from frame
-  ros_msg.left_hand = false;						// by default set both hands false in msg;
-  ros_msg.right_hand = false;
+  ros_msg.left_hand.is_present = false;					// by default set the presence of both hands false in ros_msg;
+  ros_msg.right_hand.is_present = false;
   if (hands_in_frame.count() > 2)					// if, for some reason, there are more than 2 hands, that's NOT OK, imho
     ROS_INFO("WHAT? There are more than 2 hands in the frame - that's way too many hands! Going to pretend that there are no hands until next frame.");
   else if (hands_in_frame.count() > 0)					// if there are more than 0 hands
@@ -117,7 +117,7 @@ void LeapListener::onFrame(const Leap::Controller& controller)
       // If Hand is left
       if (hands_in_frame[i].isLeft())
       {
-	ros_msg.left_hand = true;					// set ros_msg.left_hand TRUE
+	ros_msg.left_hand.is_present = true;				// set left_hand.is_present TRUE
 	left_hand = hands_in_frame[i];					// set this hand as left_hand
 
 	// FYI
@@ -127,15 +127,16 @@ void LeapListener::onFrame(const Leap::Controller& controller)
 		  << " and pinch strength: " << left_hand.pinchStrength() << std::endl;
 
 	// Convert palm position into meters and copy to ros_msg.left_palm_pos
-	ros_msg.left_palm_pose.position.x = left_hand.palmPosition().x/1000;
-	ros_msg.left_palm_pose.position.y = left_hand.palmPosition().y/1000;
-	ros_msg.left_palm_pose.position.z = left_hand.palmPosition().z/1000;
+	ros_msg.left_hand.palm_pose.header = ros_msg.header;		// use the same header as in LeapMotionOutput
+	ros_msg.left_hand.palm_pose.pose.position.x = left_hand.palmPosition().x/1000;
+	ros_msg.left_hand.palm_pose.pose.position.y = left_hand.palmPosition().y/1000;
+	ros_msg.left_hand.palm_pose.pose.position.z = left_hand.palmPosition().z/1000;
 	
 	// FYI
 	std::cout << std::fixed << std::setprecision(4)
-		  << "           position: x= " << ros_msg.left_palm_pose.position.x
-		  << " y= " << ros_msg.left_palm_pose.position.y
-		  << " z= " << ros_msg.left_palm_pose.position.z << std::endl;
+		  << "           position: x= " << ros_msg.left_hand.palm_pose.pose.position.x
+		  << " y= " << ros_msg.left_hand.palm_pose.pose.position.y
+		  << " z= " << ros_msg.left_hand.palm_pose.pose.position.z << std::endl;
 	
 	// Get hand's roll-pitch-yam and convert them into quaternion.
 	// NOTE: Leap Motion roll-pith-yaw is from the perspective of human, so I am mapping it so that roll is about x-, pitch about y-, and yaw about z-axis.
@@ -147,28 +148,29 @@ void LeapListener::onFrame(const Leap::Controller& controller)
 		  << "           RPY:      R= " << l_roll
 		  << " P= " << l_pitch
 		  << " Y= " << l_yaw << std::endl;
-	ros_msg.left_palm_pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(l_roll, l_pitch, l_yaw);
+	ros_msg.left_hand.palm_pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(l_roll, l_pitch, l_yaw);
 	
 	// Copy palm velocity to ROS message in meters
-	ros_msg.left_palm_velocity.x = left_hand.palmVelocity().x/1000;
-	ros_msg.left_palm_velocity.y = left_hand.palmVelocity().y/1000;
-	ros_msg.left_palm_velocity.z = left_hand.palmVelocity().z/1000;
+	ros_msg.left_hand.palm_velocity.header = ros_msg.header;		// use the same header as in LeapMotionOutput
+	ros_msg.left_hand.palm_velocity.vector.x = left_hand.palmVelocity().x/1000;
+	ros_msg.left_hand.palm_velocity.vector.y = left_hand.palmVelocity().y/1000;
+	ros_msg.left_hand.palm_velocity.vector.z = left_hand.palmVelocity().z/1000;
 	
 	// FYI
 	std::cout << std::fixed << std::setprecision(4)
-		  << "           velocity: x= " << ros_msg.left_palm_velocity.x
-		  << " y= " << ros_msg.left_palm_velocity.y
-		  << " z= " << ros_msg.left_palm_velocity.z << std::endl;
+		  << "           velocity: x= " << ros_msg.left_hand.palm_velocity.vector.x
+		  << " y= " << ros_msg.left_hand.palm_velocity.vector.y
+		  << " z= " << ros_msg.left_hand.palm_velocity.vector.z << std::endl;
 
 	// Put sphere radius and pinch strength into ROS message
-	ros_msg.left_hand_sphere_radius = left_hand.sphereRadius();
-	ros_msg.left_hand_pinch_strength = left_hand.pinchStrength();
+	ros_msg.left_hand.sphere_radius = left_hand.sphereRadius();
+	ros_msg.left_hand.pinch_strength = left_hand.pinchStrength();
       }
       
       // If Hand is right
       else if (hands_in_frame[i].isRight())
       {
-	ros_msg.right_hand = true;					// set ros_msg.right_hand true
+	ros_msg.right_hand.is_present = true;				// set right_hand.is_present TRUE
 	right_hand = hands_in_frame[i];					// set this hand as right_hand
 	
 	// FYI
@@ -178,15 +180,16 @@ void LeapListener::onFrame(const Leap::Controller& controller)
 		  << " and pinch strength: " << right_hand.pinchStrength() << std::endl;
 		  
 	// Convert palm position into meters and copy to ros_msg.right_palm_pos
-	ros_msg.right_palm_pose.position.x = right_hand.palmPosition().x/1000;
-	ros_msg.right_palm_pose.position.y = right_hand.palmPosition().y/1000;
-	ros_msg.right_palm_pose.position.z = right_hand.palmPosition().z/1000;
+	ros_msg.right_hand.palm_pose.header = ros_msg.header;		// use the same header as in LeapMotionOutput
+	ros_msg.right_hand.palm_pose.pose.position.x = right_hand.palmPosition().x/1000;
+	ros_msg.right_hand.palm_pose.pose.position.y = right_hand.palmPosition().y/1000;
+	ros_msg.right_hand.palm_pose.pose.position.z = right_hand.palmPosition().z/1000;
 	
 	// FYI
 	std::cout << std::fixed << std::setprecision(4)
-		  << "           position: x= " << ros_msg.right_palm_pose.position.x
-		  << " y= " << ros_msg.right_palm_pose.position.y
-		  << " z= " << ros_msg.right_palm_pose.position.z << std::endl;
+		  << "           position: x= " << ros_msg.right_hand.palm_pose.pose.position.x
+		  << " y= " << ros_msg.right_hand.palm_pose.pose.position.y
+		  << " z= " << ros_msg.right_hand.palm_pose.pose.position.z << std::endl;
 
 	// Get hand's roll-pitch-yam and convert them into quaternion.
 	// NOTE: Leap Motion roll-pith-yaw is from the perspective of human, so I am mapping it so that roll is about x-, pitch about y-, and yaw about z-axis.
@@ -198,22 +201,23 @@ void LeapListener::onFrame(const Leap::Controller& controller)
 		  << "           RPY:      R= " << r_roll
 		  << " P= " << r_pitch
 		  << " Y= " << r_yaw << std::endl;
-	ros_msg.right_palm_pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(r_roll, r_pitch, r_yaw);
+	ros_msg.right_hand.palm_pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(r_roll, r_pitch, r_yaw);
 
 	// Copy palm velocity to ROS message in meters
-	ros_msg.right_palm_velocity.x = right_hand.palmVelocity().x/1000;
-	ros_msg.right_palm_velocity.y = right_hand.palmVelocity().y/1000;
-	ros_msg.right_palm_velocity.z = right_hand.palmVelocity().z/1000;
+	ros_msg.right_hand.palm_velocity.header = ros_msg.header;		// use the same header as in LeapMotionOutput
+	ros_msg.right_hand.palm_velocity.vector.x = right_hand.palmVelocity().x/1000;
+	ros_msg.right_hand.palm_velocity.vector.y = right_hand.palmVelocity().y/1000;
+	ros_msg.right_hand.palm_velocity.vector.z = right_hand.palmVelocity().z/1000;
 	
 	// FYI
 	std::cout << std::fixed << std::setprecision(4)
-		  << "           velocity: x= " << ros_msg.right_palm_velocity.x
-		  << " y= " << ros_msg.right_palm_velocity.y
-		  << " z= " << ros_msg.right_palm_velocity.z << std::endl;
+		  << "           velocity: x= " << ros_msg.right_hand.palm_velocity.vector.x
+		  << " y= " << ros_msg.right_hand.palm_velocity.vector.y
+		  << " z= " << ros_msg.right_hand.palm_velocity.vector.z << std::endl;
 
 	// Put sphere radius and pinch strength into ROS message
-	ros_msg.right_hand_sphere_radius = right_hand.sphereRadius();
-	ros_msg.right_hand_pinch_strength = right_hand.pinchStrength();
+	ros_msg.right_hand.sphere_radius = right_hand.sphereRadius();
+	ros_msg.right_hand.pinch_strength = right_hand.pinchStrength();
       }
     } // for
   } // else if (hands_in_frame.count() > 0)
@@ -226,8 +230,8 @@ void LeapListener::onFrame(const Leap::Controller& controller)
   //	-enable_swipe:		true
   // etc ...
   Leap::GestureList gestures_in_frame = work_frame.gestures();
-  ros_msg.left_hand_key_tap = false;					// by default set KEY_TAP gestures to false on both hands
-  ros_msg.right_hand_key_tap = false;
+  ros_msg.left_hand.key_tap = false;					// by default set KEY_TAP gestures to false on both hands
+  ros_msg.right_hand.key_tap = false;
   
   // Since only KEY_TAP gestures have been enabled, any detected gesure is a KEY_TAP gesture.
   for (int j = 0; j < gestures_in_frame.count(); j++)			// go through all the gestures in the list
@@ -235,12 +239,12 @@ void LeapListener::onFrame(const Leap::Controller& controller)
     // if the hand of j-th gesture is valid and left
     if (gestures_in_frame[j].hands()[0].isValid() && gestures_in_frame[j].hands()[0].isLeft())
     {
-      ros_msg.left_hand_key_tap = true;					// report that there was a lefthand_key_tap
+      ros_msg.left_hand.key_tap = true;					// report that there was a lefthand_key_tap
     } // end if
     // if the hand of j-th gesture is valid and right
     if (gestures_in_frame[j].hands()[0].isValid() && gestures_in_frame[j].hands()[0].isRight())
     {
-      ros_msg.right_hand_key_tap = true;				// report that there was a righthand_key_tap
+      ros_msg.right_hand.key_tap = true;				// report that there was a righthand_key_tap
     } // end if
   } // end for
    
