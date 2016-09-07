@@ -34,7 +34,7 @@
 
 #include "ros/ros.h"
 #include "tf/transform_datatypes.h"
-#include "leap_motion_controller/LeapMotionOutput.h"
+#include "leap_motion_controller/Set.h"
 
 /** Implementation of Leap::Listener class. */
 class LeapListener : public Leap::Listener
@@ -88,8 +88,8 @@ void LeapListener::onFrame(const Leap::Controller& controller)
   // Get the most recent frame
   const Leap::Frame work_frame = controller.frame();
 
-  // Create a local instance of LeapMotionOutput message
-  leap_motion_controller::LeapMotionOutput ros_msg;
+  // Create a local instance of leap_motion_controller::Set message
+  leap_motion_controller::Set ros_msg;
   
   // Add ROS timestamp to ros_msg.header
   ros_msg.header.stamp = ros::Time::now();
@@ -127,7 +127,7 @@ void LeapListener::onFrame(const Leap::Controller& controller)
 		  << " and pinch strength: " << left_hand.pinchStrength() << std::endl;
 
 	// Convert palm position into meters and copy to ros_msg.left_palm_pos
-	ros_msg.left_hand.palm_pose.header = ros_msg.header;		// use the same header as in LeapMotionOutput
+	ros_msg.left_hand.palm_pose.header = ros_msg.header;		// use the same header as in Set
 	ros_msg.left_hand.palm_pose.pose.position.x = left_hand.palmPosition().x/1000;
 	ros_msg.left_hand.palm_pose.pose.position.y = left_hand.palmPosition().y/1000;
 	ros_msg.left_hand.palm_pose.pose.position.z = left_hand.palmPosition().z/1000;
@@ -151,7 +151,7 @@ void LeapListener::onFrame(const Leap::Controller& controller)
 	ros_msg.left_hand.palm_pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(l_roll, l_pitch, l_yaw);
 	
 	// Copy palm velocity to ROS message in meters
-	ros_msg.left_hand.palm_velocity.header = ros_msg.header;		// use the same header as in LeapMotionOutput
+	ros_msg.left_hand.palm_velocity.header = ros_msg.header;		// use the same header as in Set
 	ros_msg.left_hand.palm_velocity.vector.x = left_hand.palmVelocity().x/1000;
 	ros_msg.left_hand.palm_velocity.vector.y = left_hand.palmVelocity().y/1000;
 	ros_msg.left_hand.palm_velocity.vector.z = left_hand.palmVelocity().z/1000;
@@ -180,7 +180,7 @@ void LeapListener::onFrame(const Leap::Controller& controller)
 		  << " and pinch strength: " << right_hand.pinchStrength() << std::endl;
 		  
 	// Convert palm position into meters and copy to ros_msg.right_palm_pos
-	ros_msg.right_hand.palm_pose.header = ros_msg.header;		// use the same header as in LeapMotionOutput
+	ros_msg.right_hand.palm_pose.header = ros_msg.header;		// use the same header as in Set
 	ros_msg.right_hand.palm_pose.pose.position.x = right_hand.palmPosition().x/1000;
 	ros_msg.right_hand.palm_pose.pose.position.y = right_hand.palmPosition().y/1000;
 	ros_msg.right_hand.palm_pose.pose.position.z = right_hand.palmPosition().z/1000;
@@ -204,7 +204,7 @@ void LeapListener::onFrame(const Leap::Controller& controller)
 	ros_msg.right_hand.palm_pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(r_roll, r_pitch, r_yaw);
 
 	// Copy palm velocity to ROS message in meters
-	ros_msg.right_hand.palm_velocity.header = ros_msg.header;		// use the same header as in LeapMotionOutput
+	ros_msg.right_hand.palm_velocity.header = ros_msg.header;		// use the same header as in Set
 	ros_msg.right_hand.palm_velocity.vector.x = right_hand.palmVelocity().x/1000;
 	ros_msg.right_hand.palm_velocity.vector.y = right_hand.palmVelocity().y/1000;
 	ros_msg.right_hand.palm_velocity.vector.z = right_hand.palmVelocity().z/1000;
@@ -266,7 +266,7 @@ int main(int argc, char** argv)
   LeapListener listener;
 
   // Set up ROS publisher for LeapListener
-  listener.ros_publisher_ = nh.advertise<leap_motion_controller::LeapMotionOutput>("leap_motion_output", 10);
+  listener.ros_publisher_ = nh.advertise<leap_motion_controller::Set>("leap_motion_output", 10);
 
   // Instance of LEAP Controller
   Leap::Controller controller;
