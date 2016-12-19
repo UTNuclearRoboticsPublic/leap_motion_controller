@@ -36,6 +36,23 @@
 #include "tf/transform_datatypes.h"
 #include "leap_motion_controller/Set.h"
 
+/** Implementation of a lowpass filter class.
+    Refer to Julius O. Smith III, Intro. to Digital Filters with Audio Applications
+    This is a 2nd-order Butterworth LPF  */
+class lpf
+{
+  public:
+    double filter(const double& new_msrmt);
+    double c_ = 10.;	// Related to the cutoff frequency of the filter.
+			// c=1 results in a cutoff at 1/4 of the sampling rate.
+			// See bitbucket.org/AndyZe/pid if you want to get more sophisticated.
+			// Larger c --> trust the filtered data more, trust the measurements less.
+
+  private:
+    double prev_msrmts_ [3] = {0., 0., 0.};
+    double prev_filtered_msrmts_ [2] = {0., 0.};
+};
+
 /** Implementation of Leap::Listener class. */
 class LeapListener : public Leap::Listener
 {
@@ -49,7 +66,34 @@ class LeapListener : public Leap::Listener
     // ROS publisher for Leap Motion Controller data
     ros::Publisher ros_publisher_;
   private:
+
+    // Lowpass filters for the hand positions
+    lpf lpf_lhx; // Left hand x-position
+    lpf lpf_lhy;
+    lpf lpf_lhz;
+
+    lpf lpf_rhx;  // Right hand x-position
+    lpf lpf_rhy;
+    lpf lpf_rhz;
+
+    // Could also filter orientations, if necessary
 };
+
+double lpf::filter(const double& new_msrmt)
+{
+  // Push in the new measurement
+  prev_msrmts_[2] = prev_msrmts_[1];
+  prev_msrmts_[1] = prev_msrmts_[0];
+  prev_msrmts_[0] = new_msrmt;
+
+  double new_filtered_msrmt = (1/(1+c_*c_+1.414*c_))*(prev_msrmts_[2]+2*prev_msrmts_[1]+prev_msrmts_[0]-(c_*c_-1.414*c_+1)*prev_filtered_msrmts_[1]-(-2*c_*c_+2)*prev_filtered_msrmts_[0]);;
+
+  // Store the new filtered measurement
+  prev_filtered_msrmts_[1] = prev_filtered_msrmts_[0];
+  prev_filtered_msrmts_[0] = new_filtered_msrmt;
+
+  return new_filtered_msrmt;
+}
 
 void LeapListener::onInit(const Leap::Controller& controller)
 {
@@ -128,9 +172,9 @@ void LeapListener::onFrame(const Leap::Controller& controller)
 
 	// Convert palm position into meters and copy to ros_msg.left_palm_pos
 	ros_msg.left_hand.palm_pose.header = ros_msg.header;		// use the same header as in Set
-	ros_msg.left_hand.palm_pose.pose.position.x = left_hand.palmPosition().x/1000;
-	ros_msg.left_hand.palm_pose.pose.position.y = left_hand.palmPosition().y/1000;
-	ros_msg.left_hand.palm_pose.pose.position.z = left_hand.palmPosition().z/1000;
+	ros_msg.left_hand.palm_pose.pose.position.x = lpf_lhx.filter( left_hand.palmPosition().x/1000 );
+	ros_msg.left_hand.palm_pose.pose.position.y = lpf_lhy.filter( left_hand.palmPosition().y/1000 );
+	ros_msg.left_hand.palm_pose.pose.position.z = lpf_lhz.filter( left_hand.palmPosition().z/1000 );
 	
 	// FYI
 	std::cout << std::fixed << std::setprecision(4)
@@ -181,9 +225,9 @@ void LeapListener::onFrame(const Leap::Controller& controller)
 		  
 	// Convert palm position into meters and copy to ros_msg.right_palm_pos
 	ros_msg.right_hand.palm_pose.header = ros_msg.header;		// use the same header as in Set
-	ros_msg.right_hand.palm_pose.pose.position.x = right_hand.palmPosition().x/1000;
-	ros_msg.right_hand.palm_pose.pose.position.y = right_hand.palmPosition().y/1000;
-	ros_msg.right_hand.palm_pose.pose.position.z = right_hand.palmPosition().z/1000;
+	ros_msg.right_hand.palm_pose.pose.position.x = lpf_rhx.filter( right_hand.palmPosition().x/1000 );
+	ros_msg.right_hand.palm_pose.pose.position.y = lpf_rhy.filter( right_hand.palmPosition().y/1000 );
+	ros_msg.right_hand.palm_pose.pose.position.z = lpf_rhz.filter( right_hand.palmPosition().z/1000 );
 	
 	// FYI
 	std::cout << std::fixed << std::setprecision(4)
@@ -191,8 +235,8 @@ void LeapListener::onFrame(const Leap::Controller& controller)
 		  << " y= " << ros_msg.right_hand.palm_pose.pose.position.y
 		  << " z= " << ros_msg.right_hand.palm_pose.pose.position.z << std::endl;
 
-	// Get hand's roll-pitch-yam and convert them into quaternion.
-	// NOTE: Leap Motion roll-pith-yaw is from the perspective of human, so I am mapping it so that roll is about x-, pitch about y-, and yaw about z-axis.
+	// Get hand's roll-pitch-yaw and convert them into quaternion.
+	// NOTE: Leap Motion roll-pitch-yaw is from the perspective of human, so I am mapping it so that roll is about x-, pitch about y-, and yaw about z-axis.
 	float r_yaw = right_hand.palmNormal().roll();
 	float r_roll = right_hand.direction().pitch();
 	float r_pitch = -right_hand.direction().yaw();			// Negating to comply with the right hand rule.
