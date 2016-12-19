@@ -250,6 +250,9 @@ void LeapListener::onFrame(const Leap::Controller& controller)
    
   // Publish the ROS message based on this Leap Motion Controller frame.
   ros_publisher_.publish( ros_msg );
+
+  // Throttle the loop
+  ros::Duration(0.1).sleep();
  
 } // end LeapListener::onFrame()
 
