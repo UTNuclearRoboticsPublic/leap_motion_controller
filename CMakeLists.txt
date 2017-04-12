@@ -21,7 +21,7 @@ add_definitions(-std=c++11)
 add_message_files(
   FILES
   Set.msg
-  Hand.msgccd
+  Hand.msg
   Finger.msg
 )
 
