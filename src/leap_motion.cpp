@@ -36,14 +36,20 @@
 #include "tf/transform_datatypes.h"
 #include "leap_motion_controller/Set.h"
 
-/** Implementation of a lowpass filter class.
+namespace leap_motion_controller
+{
+  ros::NodeHandle* nhPtr;
+}
+
+/** Lowpass filter class.
     Refer to Julius O. Smith III, Intro. to Digital Filters with Audio Applications
     This is a 2nd-order Butterworth LPF  */
 class lpf
 {
   public:
+    lpf();
     double filter(const double& new_msrmt);
-    double c_ = 10.;	// Related to the cutoff frequency of the filter.
+    double c_ = 4.;	// Related to the cutoff frequency of the filter.
 			// c=1 results in a cutoff at 1/4 of the sampling rate.
 			// See bitbucket.org/AndyZe/pid if you want to get more sophisticated.
 			// Larger c --> trust the filtered data more, trust the measurements less.
@@ -78,6 +84,17 @@ class LeapListener : public Leap::Listener
 
     // Could also filter orientations, if necessary
 };
+
+lpf::lpf(void)
+{
+  if ( leap_motion_controller::nhPtr->hasParam("/leap_filter_param") )
+  {
+    ROS_INFO_STREAM("Setting a custom low-pass filter cutoff frequency of " << c_);
+    leap_motion_controller::nhPtr->getParam("/leap_filter_param", c_);
+  }
+  else
+    c_ = 4.;
+}
 
 double lpf::filter(const double& new_msrmt)
 {
@@ -308,6 +325,7 @@ int main(int argc, char** argv)
   
   // ROS node handle
   ros::NodeHandle nh;
+  leap_motion_controller::nhPtr = &nh; // Allow other functions to interact with the nodehandle via this pointer
 
   // Instance of LeapListener
   LeapListener listener;
