@@ -41,12 +41,13 @@ generate_messages(
 ## LIBRARIES: libraries you create in this project that dependent projects also need
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
-# catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES leap_motion_controller
-#  CATKIN_DEPENDS other_catkin_pkg
-#  DEPENDS system_lib
-# )
+catkin_package(
+# INCLUDE_DIRS include
+# LIBRARIES leap_motion_controller
+ CATKIN_DEPENDS std_msgs geometry_msgs
+# DEPENDS system_lib
+)
+
 
 ###########
 ## Build ##
@@ -56,7 +57,7 @@ generate_messages(
 ## Your package locations should be listed before other locations
 include_directories(
   include
-#   ${catkin_INCLUDE_DIRS}
+  ${catkin_INCLUDE_DIRS}
   $ENV{LEAP_SDK}/include/
 )
 
