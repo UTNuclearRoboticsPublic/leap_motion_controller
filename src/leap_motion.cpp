@@ -192,7 +192,7 @@ void LeapListener::onFrame(const Leap::Controller& controller)
 	ros_msg.left_hand.palm_pose.pose.position.x = lpf_lhx.filter( left_hand.palmPosition().x/1000 );
 	ros_msg.left_hand.palm_pose.pose.position.y = lpf_lhy.filter( left_hand.palmPosition().y/1000 );
 	ros_msg.left_hand.palm_pose.pose.position.z = lpf_lhz.filter( left_hand.palmPosition().z/1000 );
-	
+
 	// FYI
 	std::cout << std::fixed << std::setprecision(4)
 		  << "           position: x= " << ros_msg.left_hand.palm_pose.pose.position.x
@@ -283,6 +283,9 @@ void LeapListener::onFrame(const Leap::Controller& controller)
     } // for
   } // else if (hands_in_frame.count() > 0)
   
+  // Other information about the hand state
+  ros_msg.extended_fingers = work_frame.fingers().extended().count();
+
   // Getting gestures
   // TODO Do I actually need gestures in this ROS driver or at all. If the answer is YES, perhaps add some other gestures, e.g. swipe and circle.
   // Maybe enable gestures with a YAML file

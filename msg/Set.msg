@@ -8,3 +8,5 @@ std_msgs/Header header
 leap_motion_controller/Hand left_hand
 
 leap_motion_controller/Hand right_hand
+
+uint8 extended_fingers
