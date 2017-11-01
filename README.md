@@ -5,11 +5,16 @@ ROS driver for Leap Motion (TM) Controller (https://www.leapmotion.com). It read
 ### Instructions
 **Install:**
 
-Since leap_motion_controller uses Leap Motion SDK, first download the original drivers and the SDK from https://developer.leapmotion.com. Install using instructions in their README and copy LeapSDK to any desired location.
+1. Download the Leap Motion V2 Desktop SDK. Use the files given by 'jdonald' here:
+https://community.leapmotion.com/t/error-in-leapd-malloc/4271/5.
 
-Add `export LEAP_SDK=[PATH TO YOUR LeapSDK FOLDER]` to your .bashrc file.
+2. The downloaded archive also contains a folder named LeapSDK. Copy this LeapSDK folder to any desired location, e.g. your home folder (in examples I will refer to it as ~/LeapSDK)
 
-Clone this repository to your catkin workspace and compile using catkin_make.
+3. CMakeLists.txt expects to find LeapSDK at $LEAP_SDK, so add, for example, the following line to your .bashrc file:
+
+`export LEAP_SDK=~/LeapSDK`
+
+4. Clone this repository to your catkin workspace and compile using catkin_make or catkin build.
 
 **Run:**
 
